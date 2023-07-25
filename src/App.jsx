@@ -65,11 +65,12 @@ const App = () => {
       <div className="container-view">
         <Tabs>
           <TabList>
-            <Tab>All</Tab>
+            <Tab>Activity Feed</Tab>
             <Tab>Archived</Tab>
           </TabList>
 
           <TabPanel>
+            <button>Archive all</button>
             {Object.entries(groupedActivities).map(([date, activities]) => (
               <div key={date}>
                 <div>
@@ -97,6 +98,7 @@ const App = () => {
 
           <TabPanel>
             <h2>Archived calls</h2>
+            <button>Unarchive all calls</button>
           </TabPanel>
         </Tabs>
       </div>

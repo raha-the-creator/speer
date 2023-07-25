@@ -1,7 +1,7 @@
 #app {
   position: absolute;
   display: flex;
-  align-items: center;
+  /* align-items: center; */
   justify-content: center;
   left: 0;
   top: 0;
@@ -11,7 +11,8 @@
 
 #app .container {
   width: 376px;
-  height: 666px;
+  height: auto;
+  overflow-y: auto;
   z-index: 100;
   background: #fff;
   border-radius: 3px;
@@ -20,5 +21,6 @@
 
 #app .container-view {
   padding: 20px;
+  /* padding-top: 50px; */
 }
 

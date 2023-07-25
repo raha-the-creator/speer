@@ -1,6 +1,6 @@
 import React from "react";
-import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
-import "react-tabs/style/react-tabs.css";
+// import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
+// import "react-tabs/style/react-tabs.css";
 
 const Header = () => {
   return (
@@ -43,7 +43,7 @@ const Header = () => {
         </g>
       </svg>
 
-      <Tabs>
+      {/* <Tabs>
         <TabList>
           <Tab>All</Tab>
           <Tab>Archived</Tab>
@@ -55,7 +55,7 @@ const Header = () => {
         <TabPanel>
           <h2>Archived calls</h2>
         </TabPanel>
-      </Tabs>
+      </Tabs> */}
     </header>
   );
 };

@@ -75,15 +75,13 @@ const App = () => {
     } else {
       // Archive activity
       setActivities((prevActivities) =>
-        prevActivities.map((prevActivity) =>
-          prevActivity.id === activity.id
-            ? { ...prevActivity, archived: true }
-            : prevActivity
-        )
+        prevActivities.filter((prevActivity) => prevActivity.id !== activity.id)
       );
       setArchivedActivities((prevArchived) => [...prevArchived, activity]);
     }
   };
+
+  console.log(activities);
 
   return (
     <div className="container">
@@ -99,38 +97,46 @@ const App = () => {
 
           <TabPanel>
             <button>Archive all</button>
-            {Object.entries(groupedActivities).map(([date, activities]) => (
-              <div key={date}>
-                <div>
-                  <h1>{date}</h1>
-                </div>
-                {/* <br/> */}
-                {activities.map((activity) => (
-                  <div
-                    key={activity.id}
-                    style={{ border: "1px solid red", cursor: "pointer" }}
-                    onClick={() => handleActivityClick(activity)}
-                  >
-                    <p>{activity.id}</p>
-                    <p>{activity.direction} call</p>
-                    <p>from {activity.from}</p>
-                    <p>
-                      {new Date(activity.created_at)
-                        .toISOString()
-                        .slice(11, 19)}
-                    </p>
+            {Object.entries(groupedActivities)
+              .reverse() // Reverse to display recent dates first
+              .map(([date, activities]) => (
+                <div key={date}>
+                  <div>
+                    <h1>{date}</h1>
                   </div>
-                ))}
-              </div>
-            ))}
+                  {/* <br/> */}
+                  {activities
+                    .slice(0) // Clone the array to avoid mutating original data
+                    // .reverse() // Reverse to display recent activities first
+                    .map((activity) => (
+                      <div
+                        key={activity.id}
+                        style={{ border: "1px solid red", cursor: "pointer" }}
+                        onClick={() => handleActivityClick(activity)}
+                      >
+                        <p>{activity.id}</p>
+                        <p>{activity.direction} call</p>
+                        <p>from {activity.from}</p>
+                        <p>
+                          {new Date(activity.created_at)
+                            .toISOString()
+                            .slice(11, 19)}
+                        </p>
+                      </div>
+                    ))}
+                </div>
+              ))}
           </TabPanel>
 
           <TabPanel>
             <h2>Archived calls</h2>
             <button>Unarchive all calls</button>
-            {archivedActivities.map((activity) => (
-              <div key={activity.id}>
+            {archivedActivities
+              .slice(0) // Clone the array to avoid mutating original data
+              .reverse() // Reverse to display recent archived calls first
+              .map((activity) => (
                 <div
+                  key={activity.id}
                   style={{ border: "1px solid red", cursor: "pointer" }}
                   onClick={() => handleActivityClick(activity)}
                 >
@@ -141,8 +147,7 @@ const App = () => {
                     {new Date(activity.created_at).toISOString().slice(11, 19)}
                   </p>
                 </div>
-              </div>
-            ))}
+              ))}
           </TabPanel>
         </Tabs>
       </div>

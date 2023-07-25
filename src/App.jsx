@@ -9,6 +9,7 @@ import "./index.css";
 
 const App = () => {
   const [activities, setActivities] = useState([]);
+  const [archivedActivities, setArchivedActivities] = useState([]);
   const [modalActivity, setModalActivity] = useState(null);
 
   const apiURL = "https://cerulean-marlin-wig.cyclic.app/activities";
@@ -57,6 +58,33 @@ const App = () => {
     setModalActivity(null);
   };
 
+  // Handle toggling archive/unarchive
+  const handleToggleArchive = (activity) => {
+    if (activity.archived) {
+      // Unarchive activity
+      setActivities((prevActivities) =>
+        prevActivities.map((prevActivity) =>
+          prevActivity.id === activity.id
+            ? { ...prevActivity, archived: false }
+            : prevActivity
+        )
+      );
+      setArchivedActivities((prevArchived) =>
+        prevArchived.filter((prevActivity) => prevActivity.id !== activity.id)
+      );
+    } else {
+      // Archive activity
+      setActivities((prevActivities) =>
+        prevActivities.map((prevActivity) =>
+          prevActivity.id === activity.id
+            ? { ...prevActivity, archived: true }
+            : prevActivity
+        )
+      );
+      setArchivedActivities((prevArchived) => [...prevArchived, activity]);
+    }
+  };
+
   return (
     <div className="container">
       <Header />
@@ -83,6 +111,7 @@ const App = () => {
                     style={{ border: "1px solid red", cursor: "pointer" }}
                     onClick={() => handleActivityClick(activity)}
                   >
+                    <p>{activity.id}</p>
                     <p>{activity.direction} call</p>
                     <p>from {activity.from}</p>
                     <p>
@@ -99,12 +128,31 @@ const App = () => {
           <TabPanel>
             <h2>Archived calls</h2>
             <button>Unarchive all calls</button>
+            {archivedActivities.map((activity) => (
+              <div key={activity.id}>
+                <div
+                  style={{ border: "1px solid red", cursor: "pointer" }}
+                  onClick={() => handleActivityClick(activity)}
+                >
+                  <p>{activity.id}</p>
+                  <p>{activity.direction} call</p>
+                  <p>from {activity.from}</p>
+                  <p>
+                    {new Date(activity.created_at).toISOString().slice(11, 19)}
+                  </p>
+                </div>
+              </div>
+            ))}
           </TabPanel>
         </Tabs>
       </div>
 
       {modalActivity && (
-        <Modal activity={modalActivity} onClose={handleCloseModal} />
+        <Modal
+          activity={modalActivity}
+          onClose={handleCloseModal}
+          onToggleArchive={handleToggleArchive}
+        />
       )}
     </div>
   );

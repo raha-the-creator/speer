@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 
-export const Modal = ({ activity, onClose }) => {
+export const Modal = ({ activity, onClose, onToggleArchive }) => {
   // Add an event listener to the document when the modal is open
   useEffect(() => {
     const handleOutsideClick = (event) => {
@@ -17,6 +17,11 @@ export const Modal = ({ activity, onClose }) => {
     };
   }, [onClose]);
 
+  const handleArchiveClick = () => {
+    onToggleArchive(activity);
+    onClose();
+  };
+
   return (
     <div className="modal-overlay" style={modalOverlayStyle}>
       <div className="modal" style={modalStyle}>
@@ -28,7 +33,11 @@ export const Modal = ({ activity, onClose }) => {
         <p>{new Date(activity.created_at).toISOString().slice(11, 19)}</p>
         {/* Add more activity data as needed */}
 
-        <button>Archive this call</button>
+        {activity.archived ? (
+          <button onClick={handleArchiveClick}>Unarchive</button>
+        ) : (
+          <button onClick={handleArchiveClick}>Archive</button>
+        )}
       </div>
     </div>
   );

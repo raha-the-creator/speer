@@ -6,6 +6,7 @@ import { CallComp } from "./comps/Call.jsx";
 import { Modal } from "./comps/Modal.jsx";
 import { BiSolidArchiveIn } from "react-icons/bi";
 import { MdUnarchive } from "react-icons/md";
+import { SlCallIn, SlCallOut } from "react-icons/sl";
 import "react-tabs/style/react-tabs.css";
 import "./index.css";
 
@@ -53,17 +54,20 @@ const App = () => {
       setActivities((prevActivities) =>
         prevActivities.map((prevActivity) =>
           prevActivity.id === callId
-            ? { ...prevActivity, archived: true }
+            ? { ...prevActivity, is_archived: true }
             : prevActivity
         )
       );
+
+      // Check if the activity is not already in the archivedActivities array
+      const activityToArchive = activities.find(
+        (activity) => activity.id === callId
+      );
+
       setArchivedActivities((prevArchived) =>
         prevArchived.some((prevActivity) => prevActivity.id === callId)
           ? prevArchived
-          : [
-              ...prevArchived,
-              activities.find((activity) => activity.id === callId),
-            ]
+          : [...prevArchived, activityToArchive]
       );
     } catch (error) {
       console.log("Error archiving call:", error);
@@ -91,6 +95,7 @@ const App = () => {
               archivedActivities.find((activity) => activity.id === callId),
             ]
       );
+
       setArchivedActivities((prevArchived) =>
         prevArchived.filter((prevActivity) => prevActivity.id !== callId)
       );
@@ -102,11 +107,15 @@ const App = () => {
   // ARCHIVE ALL
   const archiveAllCalls = async () => {
     try {
-      for (const activity of activities) {
-        if (!activity.archived) {
-          await archiveCall(activity.id);
-        }
-      }
+      const activitiesToArchive = activities.filter(
+        (activity) => !activity.archived
+      );
+      const archivePromises = activitiesToArchive.map((activity) =>
+        archiveCall(activity.id)
+      );
+      await Promise.all(archivePromises);
+
+      setActivities([]);
     } catch (err) {
       console.log("Error archiving all calls:", err);
     }
@@ -219,7 +228,6 @@ const App = () => {
     <div className="container">
       <Header />
       <br />
-      {/* <div className="text-red-500">TEST DIV</div> */}
       <div className="container-view">
         <Tabs>
           <TabList>
@@ -240,13 +248,23 @@ const App = () => {
                 {activities.map((activity) => (
                   <div
                     key={activity.id}
-                    style={{ border: "1px solid red", cursor: "pointer" }}
+                    style={{
+                      border: "1px solid red",
+                      cursor: "pointer",
+                      marginTop: "5px",
+                    }}
                     onClick={() => handleActivityClick(activity)}
                   >
                     <p>{activity.id}</p>
-                    {activity.direction && <p>{activity.direction} call</p>}
-                    {activity.from && <p>from {activity.from}</p>}
-                    {activity.duration && <p>Duration {formatDuration(activity.duration)}</p>}
+                    {activity.direction === "inbound" ? (
+                      <SlCallIn />
+                    ) : (
+                      <SlCallOut />
+                    )}
+                    <p>{activity.from}</p>
+                    {activity.duration && (
+                      <p>Duration {formatDuration(activity.duration)}</p>
+                    )}
 
                     <p>
                       At{" "}
@@ -261,7 +279,6 @@ const App = () => {
           </TabPanel>
 
           <TabPanel>
-            <h2>Archived calls</h2>
             <button onClick={unarchiveAllCalls}>
               Unarchive all calls
               <MdUnarchive />
@@ -276,9 +293,15 @@ const App = () => {
                   onClick={() => handleActivityClick(activity)}
                 >
                   <p>{activity.id}</p>
-                  <p>{activity.direction} call</p>
-                  <p>from {activity.from}</p>
-                  <p>Duration {formatDuration(activity.duration)} </p>
+                  {activity.direction === "inbound" ? (
+                    <SlCallIn />
+                  ) : (
+                    <SlCallOut />
+                  )}
+                  {activity.from && <p>from {activity.from}</p>}
+                  {activity.duration && (
+                    <p>Duration {formatDuration(activity.duration)}</p>
+                  )}
                   <p>
                     At{" "}
                     {new Date(activity.created_at).toISOString().slice(11, 16)}

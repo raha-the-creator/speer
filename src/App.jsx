@@ -75,9 +75,16 @@ const App = () => {
     } else {
       // Archive activity
       setActivities((prevActivities) =>
-        prevActivities.filter((prevActivity) => prevActivity.id !== activity.id)
+        prevActivities.map((prevActivity) =>
+          prevActivity.id === activity.id
+            ? { ...prevActivity, archived: true }
+            : prevActivity
+        )
       );
-      setArchivedActivities((prevArchived) => [...prevArchived, activity]);
+      setArchivedActivities((prevArchived) => [
+        ...prevArchived,
+        { ...activity, archived: true },
+      ]);
     }
   };
 

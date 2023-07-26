@@ -4,8 +4,8 @@ import Header from "./Header.jsx";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { CallComp } from "./comps/Call.jsx";
 import { Modal } from "./comps/Modal.jsx";
-import { BiSolidArchiveIn } from 'react-icons/bi';
-import { MdUnarchive } from 'react-icons/md';
+import { BiSolidArchiveIn } from "react-icons/bi";
+import { MdUnarchive } from "react-icons/md";
 import "react-tabs/style/react-tabs.css";
 import "./index.css";
 
@@ -181,6 +181,37 @@ const App = () => {
     }
   };
 
+  // Function to convert seconds to hours, minutes, and seconds
+  const formatDuration = (seconds) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainingSeconds = seconds % 60;
+
+    let formattedDuration = "";
+
+    if (hours > 0) {
+      formattedDuration += `${hours} ${hours === 1 ? "hour" : "hours"}`;
+    }
+
+    if (minutes > 0) {
+      if (formattedDuration.length > 0) {
+        formattedDuration += " ";
+      }
+      formattedDuration += `${minutes} ${minutes === 1 ? "minute" : "minutes"}`;
+    }
+
+    if (remainingSeconds > 0) {
+      if (formattedDuration.length > 0) {
+        formattedDuration += " ";
+      }
+      formattedDuration += `${remainingSeconds} ${
+        remainingSeconds === 1 ? "second" : "seconds"
+      }`;
+    }
+
+    return formattedDuration;
+  };
+
   console.log("Activities feed: " + activities.length);
   console.log("Archived calls: " + archivedActivities.length);
 
@@ -213,12 +244,15 @@ const App = () => {
                     onClick={() => handleActivityClick(activity)}
                   >
                     <p>{activity.id}</p>
-                    <p>{activity.direction} call</p>
-                    <p>from {activity.from}</p>
+                    {activity.direction && <p>{activity.direction} call</p>}
+                    {activity.from && <p>from {activity.from}</p>}
+                    {activity.duration && <p>Duration {formatDuration(activity.duration)}</p>}
+
                     <p>
+                      At{" "}
                       {new Date(activity.created_at)
                         .toISOString()
-                        .slice(11, 19)}
+                        .slice(11, 16)}
                     </p>
                   </div>
                 ))}
@@ -244,8 +278,10 @@ const App = () => {
                   <p>{activity.id}</p>
                   <p>{activity.direction} call</p>
                   <p>from {activity.from}</p>
+                  <p>Duration {formatDuration(activity.duration)} </p>
                   <p>
-                    {new Date(activity.created_at).toISOString().slice(11, 19)}
+                    At{" "}
+                    {new Date(activity.created_at).toISOString().slice(11, 16)}
                   </p>
                 </div>
               ))}

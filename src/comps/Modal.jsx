@@ -33,7 +33,7 @@ export const Modal = ({ activity, onClose, onToggleArchive }) => {
         <p>{new Date(activity.created_at).toISOString().slice(11, 19)}</p>
         {/* Add more activity data as needed */}
 
-        {activity.archived ? (
+        {activity.is_archived ? (
           <button onClick={handleArchiveClick}>Unarchive</button>
         ) : (
           <button onClick={handleArchiveClick}>Archive</button>

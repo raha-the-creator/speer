@@ -29,7 +29,11 @@ const App = () => {
         // Sort activities based on the date (created_at field)
         data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-        setActivities(data);
+        const archived = data.filter((activity) => activity.is_archived);
+        const nonArchived = data.filter((activity) => !activity.is_archived);
+
+        setActivities(nonArchived);
+        setArchivedActivities(archived);
       } catch (err) {
         console.log("Error fetching data:", err);
       }

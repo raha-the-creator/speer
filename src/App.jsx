@@ -35,6 +35,107 @@ const App = () => {
     fetchData();
   }, []);
 
+  const archiveCall = async (call_id) => {
+    const url = `https://cerulean-marlin-wig.cyclic.app/activities/${call_id}`;
+    const requestOptions = {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        is_archived: true,
+      }),
+    };
+
+    try {
+      const response = await fetch(url, requestOptions);
+      if (!response.ok) {
+        throw new Error("Network response wasn't ok");
+      }
+
+      // Update the local state in the React application to reflect the archived status change
+      setActivities((prevActivities) =>
+        prevActivities.map((prevActivity) =>
+          prevActivity.id === call_id
+            ? { ...prevActivity, archived: true }
+            : prevActivity
+        )
+      );
+      setArchivedActivities((prevArchived) => [
+        ...prevArchived,
+        activities.find((activity) => activity.id === call_id),
+      ]);
+    } catch (err) {
+      console.log("Error archiving call:", err);
+    }
+  };
+
+  const unarchiveCall = async (call_id) => {
+    const url = `https://cerulean-marlin-wig.cyclic.app/activities/${call_id}`;
+    const requestOptions = {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        is_archived: false,
+      }),
+    };
+
+    try {
+      const response = await fetch(url, requestOptions);
+      if (!response.ok) {
+        throw new Error("Network response wasn't ok");
+      }
+
+      // Update the local state in the React application to reflect the unarchived status change
+      setActivities((prevActivities) =>
+        prevActivities.map((prevActivity) =>
+          prevActivity.id === call_id
+            ? { ...prevActivity, archived: false }
+            : prevActivity
+        )
+      );
+      setArchivedActivities((prevArchived) =>
+        prevArchived.filter((prevActivity) => prevActivity.id !== call_id)
+      );
+    } catch (err) {
+      console.log("Error unarchiving call:", err);
+    }
+  };
+
+  // ARCHIVE ALL
+  const archiveAllCalls = async () => {
+    try {
+      for (const activity of activities) {
+        if (!activity.archived) {
+          await archiveCall(activity.id);
+        }
+      }
+    } catch (err) {
+      console.log("Error archiving all calls:", err);
+    }
+  };
+
+  // UNARCHIVE ALL
+  const unarchiveAllCalls = async () => {
+    try {
+      for (const activity of archivedActivities) {
+        if (activity.archived) {
+          await unarchiveCall(activity.id);
+        }
+      }
+
+      setActivities((prevActivities) => [
+        ...prevActivities,
+        ...archivedActivities,
+      ]);
+      setArchivedActivities([]);
+    } catch (err) {
+      console.log("Error unarchiving all calls:", err);
+    }
+  };
+
   // Helper function to group activities by date
   const groupActivitiesByDate = (activities) => {
     const groups = {};
@@ -61,32 +162,29 @@ const App = () => {
   };
 
   // Handle toggling archive/unarchive
-  const handleToggleArchive = (activity) => {
-    if (activity.archived) {
-      // Unarchive activity
-      setActivities((prevActivities) =>
-        prevActivities.map((prevActivity) =>
-          prevActivity.id === activity.id
-            ? { ...prevActivity, archived: false }
-            : prevActivity
-        )
-      );
-      setArchivedActivities((prevArchived) =>
-        prevArchived.filter((prevActivity) => prevActivity.id !== activity.id)
-      );
-    } else {
-      // Archive activity
-      setActivities((prevActivities) =>
-        prevActivities.map((prevActivity) =>
-          prevActivity.id === activity.id
-            ? { ...prevActivity, archived: true }
-            : prevActivity
-        )
-      );
-      setArchivedActivities((prevArchived) => [
-        ...prevArchived,
-        { ...activity, archived: true },
-      ]);
+  const handleToggleArchive = async (activity) => {
+    try {
+      if (activity.archived) {
+        // Unarchive activity
+        await unarchiveCall(activity.id);
+
+        setActivities((prevActivities) => [...prevActivities, activity]);
+        setArchivedActivities((prevArchived) =>
+          prevArchived.filter((prevActivity) => prevActivity.id !== activity.id)
+        );
+      } else {
+        // Archive activity
+        await archiveCall(activity.id);
+
+        setActivities((prevActivities) =>
+          prevActivities.filter(
+            (prevActivity) => prevActivity.id !== activity.id
+          )
+        );
+        setArchivedActivities((prevArchived) => [...prevArchived, activity]);
+      }
+    } catch (err) {
+      console.log("Error toggling archive:", err);
     }
   };
 
@@ -105,7 +203,7 @@ const App = () => {
           </TabList>
 
           <TabPanel>
-            <button>Archive all</button>
+            <button onClick={archiveAllCalls}>Archive all</button>
             {Object.entries(groupedActivities).map(([date, activities]) => (
               <div key={date}>
                 <div>
@@ -133,7 +231,7 @@ const App = () => {
 
           <TabPanel>
             <h2>Archived calls</h2>
-            <button>Unarchive all calls</button>
+            <button onClick={unarchiveAllCalls}>Unarchive all calls</button>
             {archivedActivities
               .slice(0) // Clone the array to avoid mutating original data
               .reverse() // Reverse to display recent archived calls first

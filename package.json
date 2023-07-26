@@ -22,6 +22,7 @@
     "html-webpack-plugin": "^5.5.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-icons": "^4.10.1",
     "react-tabs": "^6.0.2",
     "style-loader": "^3.3.3",
     "webpack": "^5.88.2",

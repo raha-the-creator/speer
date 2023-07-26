@@ -4,6 +4,8 @@ import Header from "./Header.jsx";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
 import { CallComp } from "./comps/Call.jsx";
 import { Modal } from "./comps/Modal.jsx";
+import { BiSolidArchiveIn } from 'react-icons/bi';
+import { MdUnarchive } from 'react-icons/md';
 import "react-tabs/style/react-tabs.css";
 import "./index.css";
 
@@ -195,7 +197,10 @@ const App = () => {
           </TabList>
 
           <TabPanel>
-            <button onClick={archiveAllCalls}>Archive all</button>
+            <button onClick={archiveAllCalls}>
+              Archive all calls
+              <BiSolidArchiveIn />
+            </button>
             {Object.entries(groupedActivities).map(([date, activities]) => (
               <div key={date}>
                 <div>
@@ -223,7 +228,10 @@ const App = () => {
 
           <TabPanel>
             <h2>Archived calls</h2>
-            <button onClick={unarchiveAllCalls}>Unarchive all calls</button>
+            <button onClick={unarchiveAllCalls}>
+              Unarchive all calls
+              <MdUnarchive />
+            </button>
             {archivedActivities
               .slice(0) // Clone the array to avoid mutating original data
               .reverse() // Reverse to display recent archived calls first

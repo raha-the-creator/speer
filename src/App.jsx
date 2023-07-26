@@ -35,72 +35,65 @@ const App = () => {
     fetchData();
   }, []);
 
-  const archiveCall = async (call_id) => {
-    const url = `https://cerulean-marlin-wig.cyclic.app/activities/${call_id}`;
-    const requestOptions = {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        is_archived: true,
-      }),
-    };
-
+  const archiveCall = async (callId) => {
     try {
-      const response = await fetch(url, requestOptions);
-      if (!response.ok) {
-        throw new Error("Network response wasn't ok");
-      }
+      await fetch(
+        `https://cerulean-marlin-wig.cyclic.app/activities/${callId}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ is_archived: true }),
+        }
+      );
 
-      // Update the local state in the React application to reflect the archived status change
       setActivities((prevActivities) =>
         prevActivities.map((prevActivity) =>
-          prevActivity.id === call_id
+          prevActivity.id === callId
             ? { ...prevActivity, archived: true }
             : prevActivity
         )
       );
-      setArchivedActivities((prevArchived) => [
-        ...prevArchived,
-        activities.find((activity) => activity.id === call_id),
-      ]);
-    } catch (err) {
-      console.log("Error archiving call:", err);
+      setArchivedActivities((prevArchived) =>
+        prevArchived.some((prevActivity) => prevActivity.id === callId)
+          ? prevArchived
+          : [
+              ...prevArchived,
+              activities.find((activity) => activity.id === callId),
+            ]
+      );
+    } catch (error) {
+      console.log("Error archiving call:", error);
     }
   };
 
-  const unarchiveCall = async (call_id) => {
-    const url = `https://cerulean-marlin-wig.cyclic.app/activities/${call_id}`;
-    const requestOptions = {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        is_archived: false,
-      }),
-    };
-
+  const unarchiveCall = async (callId) => {
     try {
-      const response = await fetch(url, requestOptions);
-      if (!response.ok) {
-        throw new Error("Network response wasn't ok");
-      }
+      await fetch(
+        `https://cerulean-marlin-wig.cyclic.app/activities/${callId}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ is_archived: false }),
+        }
+      );
 
-      // Update the local state in the React application to reflect the unarchived status change
       setActivities((prevActivities) =>
-        prevActivities.map((prevActivity) =>
-          prevActivity.id === call_id
-            ? { ...prevActivity, archived: false }
-            : prevActivity
-        )
+        prevActivities.some((prevActivity) => prevActivity.id === callId)
+          ? prevActivities
+          : [
+              ...prevActivities,
+              archivedActivities.find((activity) => activity.id === callId),
+            ]
       );
       setArchivedActivities((prevArchived) =>
-        prevArchived.filter((prevActivity) => prevActivity.id !== call_id)
+        prevArchived.filter((prevActivity) => prevActivity.id !== callId)
       );
-    } catch (err) {
-      console.log("Error unarchiving call:", err);
+    } catch (error) {
+      console.log("Error unarchiving call:", error);
     }
   };
 
@@ -162,33 +155,32 @@ const App = () => {
   };
 
   // Handle toggling archive/unarchive
-  const handleToggleArchive = async (activity) => {
-    try {
-      if (activity.archived) {
-        // Unarchive activity
-        await unarchiveCall(activity.id);
-
-        setActivities((prevActivities) => [...prevActivities, activity]);
-        setArchivedActivities((prevArchived) =>
-          prevArchived.filter((prevActivity) => prevActivity.id !== activity.id)
-        );
-      } else {
-        // Archive activity
-        await archiveCall(activity.id);
-
-        setActivities((prevActivities) =>
-          prevActivities.filter(
-            (prevActivity) => prevActivity.id !== activity.id
-          )
-        );
-        setArchivedActivities((prevArchived) => [...prevArchived, activity]);
-      }
-    } catch (err) {
-      console.log("Error toggling archive:", err);
+  const handleToggleArchive = (activity) => {
+    if (activity.archived) {
+      // Unarchive activity
+      const updatedActivities = activities.map((prevActivity) =>
+        prevActivity.id === activity.id
+          ? { ...prevActivity, archived: false }
+          : prevActivity
+      );
+      setActivities(updatedActivities);
+      setArchivedActivities((prevArchived) =>
+        prevArchived.filter((prevActivity) => prevActivity.id !== activity.id)
+      );
+    } else {
+      // Archive activity
+      const updatedActivities = activities.map((prevActivity) =>
+        prevActivity.id === activity.id
+          ? { ...prevActivity, archived: true }
+          : prevActivity
+      );
+      setActivities(updatedActivities);
+      setArchivedActivities((prevArchived) => [...prevArchived, activity]);
     }
   };
 
-  console.log(activities);
+  console.log("Activities feed: " + activities.length);
+  console.log("Archived calls: " + archivedActivities.length);
 
   return (
     <div className="container">

@@ -39,11 +39,13 @@ const App = () => {
   const groupActivitiesByDate = (activities) => {
     const groups = {};
     activities.forEach((activity) => {
-      const date = new Date(activity.created_at).toISOString().slice(0, 10);
-      if (!groups[date]) {
-        groups[date] = [];
+      if (!activity.archived) {
+        const date = new Date(activity.created_at).toISOString().slice(0, 10);
+        if (!groups[date]) {
+          groups[date] = [];
+        }
+        groups[date].push(activity);
       }
-      groups[date].push(activity);
     });
     return groups;
   };
@@ -104,35 +106,29 @@ const App = () => {
 
           <TabPanel>
             <button>Archive all</button>
-            {Object.entries(groupedActivities)
-              .reverse() // Reverse to display recent dates first
-              .map(([date, activities]) => (
-                <div key={date}>
-                  <div>
-                    <h1>{date}</h1>
-                  </div>
-                  {/* <br/> */}
-                  {activities
-                    .slice(0) // Clone the array to avoid mutating original data
-                    // .reverse() // Reverse to display recent activities first
-                    .map((activity) => (
-                      <div
-                        key={activity.id}
-                        style={{ border: "1px solid red", cursor: "pointer" }}
-                        onClick={() => handleActivityClick(activity)}
-                      >
-                        <p>{activity.id}</p>
-                        <p>{activity.direction} call</p>
-                        <p>from {activity.from}</p>
-                        <p>
-                          {new Date(activity.created_at)
-                            .toISOString()
-                            .slice(11, 19)}
-                        </p>
-                      </div>
-                    ))}
+            {Object.entries(groupedActivities).map(([date, activities]) => (
+              <div key={date}>
+                <div>
+                  <h1>{date}</h1>
                 </div>
-              ))}
+                {activities.map((activity) => (
+                  <div
+                    key={activity.id}
+                    style={{ border: "1px solid red", cursor: "pointer" }}
+                    onClick={() => handleActivityClick(activity)}
+                  >
+                    <p>{activity.id}</p>
+                    <p>{activity.direction} call</p>
+                    <p>from {activity.from}</p>
+                    <p>
+                      {new Date(activity.created_at)
+                        .toISOString()
+                        .slice(11, 19)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ))}
           </TabPanel>
 
           <TabPanel>

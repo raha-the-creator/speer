@@ -9,6 +9,7 @@ import { MdUnarchive } from "react-icons/md";
 import { SlCallIn, SlCallOut } from "react-icons/sl";
 import "react-tabs/style/react-tabs.css";
 import "./index.css";
+import {getActivities} from "./api/api";
 
 const App = () => {
   const [activities, setActivities] = useState([]);
@@ -17,29 +18,54 @@ const App = () => {
 
   const apiURL = "https://cerulean-marlin-wig.cyclic.app/activities";
 
+  // useEffect(() => {
+  //   getActivities();
+  //   const fetchData = async () => {
+  //     try {
+  //       const response = await fetch(apiURL);
+  //       if (!response.ok) {
+  //         throw new Error("Network response wasn't ok");
+  //       }
+  //       const data = await response.json();
+
+  //       // Sort activities based on the date (created_at field)
+  //       data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+  //       const archived = data.filter((activity) => activity.is_archived);
+  //       const nonArchived = data.filter((activity) => !activity.is_archived);
+
+  //       setActivities(nonArchived);
+  //       setArchivedActivities(archived);
+  //     } catch (err) {
+  //       console.log("Error fetching data:", err);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, []);
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(apiURL);
-        if (!response.ok) {
-          throw new Error("Network response wasn't ok");
-        }
-        const data = await response.json();
+    (async () => {
+      const data = await getActivities();
+      data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
-        // Sort activities based on the date (created_at field)
-        data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      // const archived = data.filter((activity) => activity.is_archived);
+      // const nonArchived = data.filter((activity) => !activity.is_archived);
 
-        const archived = data.filter((activity) => activity.is_archived);
-        const nonArchived = data.filter((activity) => !activity.is_archived);
+      const newData = data.reduce(
+        (acc, item) => {
+          if (item.is_archived) {
+            return { ...acc, archived: [...acc.archived, item] };
+          }
+          return { ...acc, nonArchived: [...acc.nonArchived, item] };
+        },
+        { archived: [], nonArchived: [] }
+      );
 
-        setActivities(nonArchived);
-        setArchivedActivities(archived);
-      } catch (err) {
-        console.log("Error fetching data:", err);
-      }
-    };
-
-    fetchData();
+      setActivities(newData.nonArchived);
+      setArchivedActivities(newData.archived);
+      console.log(newData);
+    })();
   }, []);
 
   const archiveCall = async (callId) => {
@@ -225,14 +251,15 @@ const App = () => {
     return formattedDuration;
   };
 
-  console.log("Activities feed: " + activities.length);
-  console.log("Archived calls: " + archivedActivities.length);
+  // console.log("Activities feed: " + activities.length);
+  // console.log("Archived calls: " + archivedActivities.length);
 
   return (
     <div className="container">
       <Header />
       <br />
       <div className="container-view">
+        <div className="text-red-500 underline">raha</div>
         <Tabs>
           <TabList>
             <Tab>Activity Feed</Tab>
